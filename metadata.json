@@ -1,0 +1,6 @@
+{
+  "name": "Smart University Attendance Management System",
+  "description": "Commercial-grade university attendance system featuring student ID verification, GPS geofencing, automated selfie facial capture, lecturer live projector QR sessions, and comprehensive admin analytics.",
+  "requestFramePermissions": ["camera", "geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: university-attendance-demo
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: 22.12.0
+      - key: NODE_ENV
+        value: production
+      - key: ATTENDANCE_DATA_FILE
+        value: /tmp/attendance-state.json
+      - key: DEMO_ACCESS_USER
+        sync: false
+      - key: DEMO_ACCESS_PASSWORD
+        sync: false
