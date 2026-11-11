@@ -13,7 +13,3 @@ services:
         value: production
       - key: ATTENDANCE_DATA_FILE
         value: /tmp/attendance-state.json
-      - key: DEMO_ACCESS_USER
-        value: attendance-demo
-      - key: DEMO_ACCESS_PASSWORD
-        generateValue: true

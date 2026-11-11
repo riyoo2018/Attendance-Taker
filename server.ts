@@ -4,7 +4,6 @@
  */
 
 import express, { Request, Response } from 'express';
-import { timingSafeEqual } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -36,43 +35,7 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 const isProduction = process.env.NODE_ENV === 'production';
 const stateFile = process.env.ATTENDANCE_DATA_FILE || path.join(__dirname, 'data', 'attendance-state.json');
 
-function safeCredentialMatch(value: string, expected: string): boolean {
-  const valueBuffer = Buffer.from(value);
-  const expectedBuffer = Buffer.from(expected);
-  return valueBuffer.length === expectedBuffer.length && timingSafeEqual(valueBuffer, expectedBuffer);
-}
-
-function requireDemoAccess(req: Request, res: Response, next: express.NextFunction): void {
-  const authorization = req.get('authorization') || '';
-  const credentials = authorization.startsWith('Basic ')
-    ? Buffer.from(authorization.slice(6), 'base64').toString('utf8')
-    : '';
-  const separator = credentials.indexOf(':');
-  const username = separator >= 0 ? credentials.slice(0, separator) : '';
-  const password = separator >= 0 ? credentials.slice(separator + 1) : '';
-  const expectedUsername = process.env.DEMO_ACCESS_USER || '';
-  const expectedPassword = process.env.DEMO_ACCESS_PASSWORD || '';
-
-  if (safeCredentialMatch(username, expectedUsername) && safeCredentialMatch(password, expectedPassword)) {
-    next();
-    return;
-  }
-
-  res.set('WWW-Authenticate', 'Basic realm="Attendance Demo", charset="UTF-8"');
-  res.status(401).send('Authentication required.');
-}
-
-if (isProduction && (
-  !process.env.DEMO_ACCESS_USER ||
-  process.env.DEMO_ACCESS_USER.includes(':') ||
-  !process.env.DEMO_ACCESS_PASSWORD ||
-  process.env.DEMO_ACCESS_PASSWORD.length < 16
-)) {
-  throw new Error('Production requires DEMO_ACCESS_USER and a DEMO_ACCESS_PASSWORD of at least 16 characters.');
-}
-
 app.get('/healthz', (_req: Request, res: Response) => res.status(200).send('ok'));
-if (isProduction) app.use(requireDemoAccess);
 
 // Middleware for parsing JSON with generous limit for selfie images
 app.use(express.json({ limit: '10mb' }));
