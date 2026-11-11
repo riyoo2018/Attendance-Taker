@@ -14,6 +14,6 @@ services:
       - key: ATTENDANCE_DATA_FILE
         value: /tmp/attendance-state.json
       - key: DEMO_ACCESS_USER
-        sync: false
+        value: attendance-demo
       - key: DEMO_ACCESS_PASSWORD
-        sync: false
+        generateValue: true
