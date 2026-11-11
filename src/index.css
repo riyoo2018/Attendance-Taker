@@ -40,6 +40,10 @@
   box-shadow: 0 4px 16px rgb(15 23 42 / 4%);
 }
 
+.mobile-bottom-nav {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
 /* Custom pulsing dashed camera frame ring from reference video */
 @keyframes spin-slow {
   from {

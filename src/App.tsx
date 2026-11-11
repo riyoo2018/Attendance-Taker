@@ -30,11 +30,8 @@ import { TopNavbar } from './components/Common/TopNavbar.tsx';
 import { StudentAttendanceFlow } from './components/Student/StudentAttendanceFlow.tsx';
 import { LecturerDashboard } from './components/Lecturer/LecturerDashboard.tsx';
 import { AdminDashboard } from './components/Admin/AdminDashboard.tsx';
-import { Smartphone, Monitor, ShieldCheck, Wifi, Battery, Signal } from 'lucide-react';
-
 export default function App() {
   const [currentView, setCurrentView] = useState<'student' | 'lecturer' | 'admin'>('student');
-  const [isMobileDeviceFrame, setIsMobileDeviceFrame] = useState<boolean>(true);
 
   // Application Data States
   const [university, setUniversity] = useState<University>(initialUniversity);
@@ -161,80 +158,22 @@ export default function App() {
       <TopNavbar
         currentView={currentView}
         onViewChange={(view) => setCurrentView(view)}
-        isMobileDeviceFrame={isMobileDeviceFrame}
-        onToggleDeviceFrame={() => setIsMobileDeviceFrame(!isMobileDeviceFrame)}
       />
 
       {/* ---------------- MAIN VIEW CONTAINER ---------------- */}
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
+      <main className={currentView === 'student'
+        ? 'w-full flex-1 pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:mx-auto md:max-w-7xl md:px-8 md:py-8 md:pb-8'
+        : 'mx-auto w-full max-w-7xl flex-1 px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-8'}>
         {/* VIEW 1: STUDENT ATTENDANCE WORKFLOW */}
         {currentView === 'student' && (
-          <div className="flex flex-col items-center justify-center py-2 sm:py-6">
-            {isMobileDeviceFrame ? (
-              /* Realistic iPhone 15 Frame matching the reference video */
-              <div className="relative mx-auto w-full max-w-[410px]">
-                {/* Physical Phone Chassis */}
-                <div className="relative bg-slate-900 rounded-[48px] p-3 shadow-2xl ring-1 ring-slate-800/80 border-4 border-slate-700/60">
-                  {/* Dynamic Island Pill */}
-                  <div className="absolute top-5 left-1/2 -translate-x-1/2 w-28 h-6 bg-black rounded-full z-30 flex items-center justify-end pr-2.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
-                  </div>
-
-                  {/* Phone Screen Container */}
-                  <div className="relative bg-slate-50 rounded-[40px] overflow-hidden flex flex-col pt-3">
-                    {/* iOS Status Bar */}
-                    <div className="flex items-center justify-between px-6 pt-2 pb-1 text-[11px] font-semibold text-slate-800 z-20">
-                      <span className="font-mono">3:32</span>
-                      <div className="flex items-center gap-1.5 text-slate-700">
-                        <Signal className="w-3 h-3" />
-                        <Wifi className="w-3 h-3" />
-                        <Battery className="w-3.5 h-3.5" />
-                      </div>
-                    </div>
-
-                    {/* Applet Mobile View */}
-                    <div className="overflow-y-auto max-h-[740px] scrollbar-none">
-                      <StudentAttendanceFlow
-                        university={university}
-                        activeSession={activeSession}
-                        students={studentsLoaded ? students : []}
-                        attendanceRecords={attendanceRecords}
-                        onAttendanceCompleted={handleAttendanceCompleted}
-                        onSwitchToLecturer={() => setCurrentView('lecturer')}
-                      />
-                    </div>
-
-                    {/* iOS Home Indicator Bar */}
-                    <div className="py-2 flex justify-center bg-white">
-                      <div className="w-32 h-1 bg-slate-300 rounded-full" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Mobile Frame Footnote Switcher */}
-                <div className="text-center mt-3">
-                  <button
-                    onClick={() => setIsMobileDeviceFrame(false)}
-                    className="text-xs text-slate-500 hover:text-slate-800 underline font-medium"
-                  >
-                    Expand to full responsive screen &rarr;
-                  </button>
-                </div>
-              </div>
-            ) : (
-              /* Full Responsive View */
-              <div className="w-full max-w-xl">
-                <StudentAttendanceFlow
-                  university={university}
-                  activeSession={activeSession}
-                  students={studentsLoaded ? students : []}
-                  attendanceRecords={attendanceRecords}
-                  onAttendanceCompleted={handleAttendanceCompleted}
-                  onSwitchToLecturer={() => setCurrentView('lecturer')}
-                />
-              </div>
-            )}
-          </div>
+          <StudentAttendanceFlow
+            university={university}
+            activeSession={activeSession}
+            students={studentsLoaded ? students : []}
+            attendanceRecords={attendanceRecords}
+            onAttendanceCompleted={handleAttendanceCompleted}
+            onSwitchToLecturer={() => setCurrentView('lecturer')}
+          />
         )}
 
         {/* VIEW 2: LECTURER & LIVE PROJECTOR MODE */}
@@ -295,7 +234,7 @@ export default function App() {
       </main>
 
       {/* ---------------- FOOTER ---------------- */}
-      <footer className="border-t border-slate-200 bg-white py-4 text-xs text-slate-500 mt-auto">
+      <footer className="mt-auto hidden border-t border-slate-200 bg-white py-4 text-xs text-slate-500 md:block">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
           <div className="flex items-center gap-2">
             <span className="font-bold text-slate-800">{university.name}</span>

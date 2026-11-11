@@ -390,7 +390,7 @@ export const StudentAttendanceFlow: React.FC<StudentAttendanceFlowProps> = ({
   };
 
   return (
-    <div className="w-full max-w-md mx-auto bg-white rounded-3xl shadow-xl border border-slate-200/80 overflow-hidden flex flex-col min-h-[640px] transition-all">
+    <div className="student-app mx-auto flex min-h-[calc(100dvh-8.5rem)] w-full max-w-lg flex-col overflow-hidden bg-white transition-all md:min-h-[640px] md:rounded-2xl md:border md:border-slate-200/80 md:shadow-xl">
       {/* ---------------- UNIVERSITY HEADER ---------------- */}
       <div className="bg-[#044e29] text-white px-5 pt-5 pb-4">
         {/* Top Brand Bar */}
@@ -492,7 +492,7 @@ export const StudentAttendanceFlow: React.FC<StudentAttendanceFlowProps> = ({
       </div>
 
       {/* ---------------- MAIN BODY CONTENT ---------------- */}
-      <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+      <div className="flex flex-1 flex-col justify-between space-y-4 px-4 py-5 sm:px-5">
         {/* ==================== STEP 1: DETAILS ==================== */}
         {currentStep === 'details' && (
           <div className="space-y-4">
