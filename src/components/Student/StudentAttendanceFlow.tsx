@@ -352,7 +352,7 @@ export const StudentAttendanceFlow: React.FC<StudentAttendanceFlowProps> = ({
         const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
         setCapturedPhoto(dataUrl);
         stopCamera();
-        startAutoSubmitTimer(dataUrl);
+        if (locationStatus === 'verified') startAutoSubmitTimer(dataUrl);
       }
     } else {
       setCameraError('Camera is not ready. Allow camera permission and retry.');
@@ -389,6 +389,11 @@ export const StudentAttendanceFlow: React.FC<StudentAttendanceFlowProps> = ({
 
   // Submit attendance to backend
   const submitAttendance = async (photoData: string) => {
+    if (locationStatus !== 'verified') {
+      setSubmissionError('Attendance submission is available only after your campus location is verified.');
+      return;
+    }
+
     setCurrentStep('recording');
     setSubmissionError(null);
 
@@ -777,13 +782,13 @@ export const StudentAttendanceFlow: React.FC<StudentAttendanceFlowProps> = ({
             <div className="pt-2">
               <button
                 type="button"
-                disabled={!verifiedStudent || alreadyRegisteredRecord !== null || locationStatus === 'out_of_bounds'}
+                disabled={!verifiedStudent || alreadyRegisteredRecord !== null}
                 onClick={() => {
                   setCurrentStep('selfie');
                   startCamera();
                 }}
                 className={`w-full py-3.5 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-sm transition-all ${
-                  verifiedStudent && alreadyRegisteredRecord === null && locationStatus !== 'out_of_bounds'
+                  verifiedStudent && alreadyRegisteredRecord === null
                     ? 'bg-[#044e29] hover:bg-[#033b1f] text-white active:scale-[0.99] cursor-pointer'
                     : 'bg-slate-200 text-slate-400 cursor-not-allowed'
                 }`}
@@ -880,7 +885,9 @@ export const StudentAttendanceFlow: React.FC<StudentAttendanceFlowProps> = ({
             ) : (
               <div className="space-y-3">
                 <p className="text-xs text-slate-600">
-                  Review the photo before submitting your attendance.
+                  {locationStatus === 'verified'
+                    ? 'Review your photo. It will be attached to your attendance record.'
+                    : 'Face detected. You can test the sensor here, but attendance can only be submitted after campus location is verified.'}
                 </p>
 
                 <div className="flex items-center justify-center gap-3">
@@ -895,15 +902,16 @@ export const StudentAttendanceFlow: React.FC<StudentAttendanceFlowProps> = ({
 
                   <button
                     type="button"
+                    disabled={locationStatus !== 'verified'}
                     onClick={() => {
                       if (autoSubmitTimerRef.current) clearInterval(autoSubmitTimerRef.current);
                       autoSubmitTimerRef.current = null;
                       setAutoSubmitCountdown(null);
                       submitAttendance(capturedPhoto);
                     }}
-                    className="inline-flex items-center gap-1.5 px-5 py-2 bg-[#044e29] hover:bg-[#033b1f] text-white font-semibold text-xs rounded-xl shadow-xs transition-colors"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#044e29] px-5 py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[#033b1f] disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <span>Submit now</span>
+                    <span>{locationStatus === 'verified' ? 'Submit now' : 'Campus location required'}</span>
                   </button>
                 </div>
               </div>
