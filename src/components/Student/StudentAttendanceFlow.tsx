@@ -262,13 +262,14 @@ export const StudentAttendanceFlow: React.FC<StudentAttendanceFlowProps> = ({
       if (!video) throw new Error('Camera preview is unavailable.');
       video.srcObject = stream;
       await video.play();
+      if (requestId !== cameraRequestRef.current) return;
 
       if (!faceDetectorRef.current) {
         const { FaceDetector, FilesetResolver } = await import('@mediapipe/tasks-vision');
         const vision = await FilesetResolver.forVisionTasks(
           'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.2.3/wasm'
         );
-        faceDetectorRef.current = await FaceDetector.createFromOptions(vision, {
+        const detector = await FaceDetector.createFromOptions(vision, {
           baseOptions: {
             modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite',
             delegate: 'CPU',
@@ -276,6 +277,11 @@ export const StudentAttendanceFlow: React.FC<StudentAttendanceFlowProps> = ({
           runningMode: 'VIDEO',
           minDetectionConfidence: 0.65,
         });
+        if (requestId !== cameraRequestRef.current) {
+          detector.close();
+          return;
+        }
+        faceDetectorRef.current = detector;
       }
 
       if (requestId !== cameraRequestRef.current || !cameraStreamRef.current) return;
