@@ -345,7 +345,7 @@ app.post('/api/attendance/submit', (req: Request, res: Response) => {
     timeFormatted,
     dateFormatted,
     status: 'PRESENT',
-    verificationMethod: 'GPS_FACE',
+    verificationMethod: 'GPS_SELFIE',
     gpsAccuracyMeters: demoSimulation ? 13 : deviceCoordinates.accuracy,
     distanceFromVenueMeters: distance,
     deviceLatitude: userLat,

@@ -105,7 +105,7 @@ export interface AttendanceRecord {
   timeFormatted: string; // "15:33:11"
   dateFormatted: string; // "Nov 10, 2026"
   status: 'PRESENT' | 'LATE' | 'EXCUSED' | 'ABSENT';
-  verificationMethod: 'GPS_FACE' | 'MANUAL_OVERRIDE';
+  verificationMethod: 'GPS_SELFIE' | 'GPS_FACE' | 'MANUAL_OVERRIDE';
   gpsAccuracyMeters: number;
   distanceFromVenueMeters: number;
   deviceLatitude: number;

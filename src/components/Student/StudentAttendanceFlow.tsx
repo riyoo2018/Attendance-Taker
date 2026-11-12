@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
+import type { FaceDetector as MediaPipeFaceDetector } from '@mediapipe/tasks-vision';
 import {
   Student,
   AttendanceSession,
@@ -70,10 +71,15 @@ export const StudentAttendanceFlow: React.FC<StudentAttendanceFlowProps> = ({
   // Step 2: Camera & Selfie Capture
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const cameraStreamRef = useRef<MediaStream | null>(null);
+  const faceDetectorRef = useRef<MediaPipeFaceDetector | null>(null);
+  const detectionFrameRef = useRef<number | null>(null);
+  const lastDetectionTimestampRef = useRef<number>(0);
+  const cameraRequestRef = useRef(0);
   const autoSubmitTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
+  const [faceDetected, setFaceDetected] = useState<boolean>(false);
   const [autoSubmitCountdown, setAutoSubmitCountdown] = useState<number | null>(null);
   const [faceDetectionStatus, setFaceDetectionStatus] = useState<string>('Looking for your face...');
 
@@ -228,10 +234,13 @@ export const StudentAttendanceFlow: React.FC<StudentAttendanceFlowProps> = ({
 
   // Start Camera Stream
   const startCamera = async () => {
+    stopCamera();
+    const requestId = ++cameraRequestRef.current;
     setCameraError(null);
     setCapturedPhoto(null);
+    setFaceDetected(false);
     setAutoSubmitCountdown(null);
-    setFaceDetectionStatus('Camera ready. Position yourself and take a photo.');
+    setFaceDetectionStatus('Starting camera and face sensor...');
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -243,28 +252,86 @@ export const StudentAttendanceFlow: React.FC<StudentAttendanceFlowProps> = ({
         audio: false,
       });
 
-      setCameraStream(stream);
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play().catch((e) => console.error('Video play error:', e));
+      if (requestId !== cameraRequestRef.current) {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
       }
 
+      cameraStreamRef.current = stream;
+      const video = videoRef.current;
+      if (!video) throw new Error('Camera preview is unavailable.');
+      video.srcObject = stream;
+      await video.play();
+
+      if (!faceDetectorRef.current) {
+        const { FaceDetector, FilesetResolver } = await import('@mediapipe/tasks-vision');
+        const vision = await FilesetResolver.forVisionTasks(
+          'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.2.3/wasm'
+        );
+        faceDetectorRef.current = await FaceDetector.createFromOptions(vision, {
+          baseOptions: {
+            modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite',
+            delegate: 'CPU',
+          },
+          runningMode: 'VIDEO',
+          minDetectionConfidence: 0.65,
+        });
+      }
+
+      if (requestId !== cameraRequestRef.current || !cameraStreamRef.current) return;
+      lastDetectionTimestampRef.current = 0;
+      setFaceDetectionStatus('Face sensor ready. Center your face in the frame.');
+
+      const detectFrame = (timestamp: number) => {
+        if (requestId !== cameraRequestRef.current || !cameraStreamRef.current) return;
+        const currentVideo = videoRef.current;
+        const detector = faceDetectorRef.current;
+
+        if (currentVideo && detector && currentVideo.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
+          timestamp - lastDetectionTimestampRef.current >= 120) {
+          try {
+            lastDetectionTimestampRef.current = timestamp;
+            const result = detector.detectForVideo(currentVideo, timestamp);
+            const detected = result.detections.length > 0;
+            setFaceDetected(detected);
+            setFaceDetectionStatus(detected ? 'Face detected. Hold still.' : 'No face detected. Center your face in the frame.');
+          } catch (error) {
+            console.error('Face detection failed:', error);
+            setCameraError('Face sensor stopped. Retry camera access.');
+            stopCamera();
+            return;
+          }
+        }
+
+        detectionFrameRef.current = requestAnimationFrame(detectFrame);
+      };
+
+      detectionFrameRef.current = requestAnimationFrame(detectFrame);
     } catch (err: any) {
       console.warn('Camera access unavailable or denied:', err);
-      setCameraError('Camera access unavailable. Allow camera permission and retry.');
+      stopCamera();
+      setFaceDetectionStatus('Face sensor unavailable.');
+      setCameraError(err?.message || 'Allow camera access and check your internet connection, then retry.');
     }
   };
 
   // Stop Camera Stream
   const stopCamera = () => {
-    if (cameraStream) {
-      cameraStream.getTracks().forEach((t) => t.stop());
-      setCameraStream(null);
-    }
+    cameraRequestRef.current += 1;
+    if (detectionFrameRef.current !== null) cancelAnimationFrame(detectionFrameRef.current);
+    detectionFrameRef.current = null;
+    cameraStreamRef.current?.getTracks().forEach((track) => track.stop());
+    cameraStreamRef.current = null;
+    if (videoRef.current) videoRef.current.srcObject = null;
   };
 
   // Capture Photo from video stream
   const capturePhoto = () => {
+    if (!faceDetected) {
+      setCameraError('A face must be visible in the frame before taking a photo.');
+      return;
+    }
+
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
@@ -369,6 +436,8 @@ export const StudentAttendanceFlow: React.FC<StudentAttendanceFlowProps> = ({
     return () => {
       if (autoSubmitTimerRef.current) clearInterval(autoSubmitTimerRef.current);
       stopCamera();
+      faceDetectorRef.current?.close();
+      faceDetectorRef.current = null;
     };
   }, []);
 
@@ -667,7 +736,7 @@ export const StudentAttendanceFlow: React.FC<StudentAttendanceFlowProps> = ({
             <div className="bg-amber-50/80 border border-amber-200/90 rounded-2xl p-3.5 text-xs text-amber-900 flex items-start gap-2.5">
               <Camera className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
               <p className="leading-relaxed">
-                Your selfie is attached to the attendance record. It is not used for face recognition.
+                The camera checks that a face is in frame before capture. Detection runs on this device and does not identify you.
               </p>
             </div>
 
@@ -778,8 +847,8 @@ export const StudentAttendanceFlow: React.FC<StudentAttendanceFlowProps> = ({
             {/* Camera Status & Light Guide */}
             {!capturedPhoto ? (
               <div className="space-y-3">
-                <p className="text-xs font-semibold text-emerald-900 flex items-center justify-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-600" />
+                <p className={`flex items-center justify-center gap-1.5 text-xs font-semibold ${faceDetected ? 'text-emerald-900' : 'text-slate-600'}`}>
+                  <span className={`h-2 w-2 rounded-full ${faceDetected ? 'bg-emerald-600' : 'bg-amber-500'}`} />
                   {faceDetectionStatus}
                 </p>
                 <p className="text-[11px] text-slate-500">
@@ -795,7 +864,8 @@ export const StudentAttendanceFlow: React.FC<StudentAttendanceFlowProps> = ({
                 <button
                   type="button"
                   onClick={cameraError ? startCamera : capturePhoto}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs rounded-xl border border-slate-300 transition-colors shadow-xs"
+                  disabled={!cameraError && !faceDetected}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-slate-100 px-5 py-2.5 text-xs font-semibold text-slate-800 shadow-xs transition-colors hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Camera className="w-4 h-4 text-[#044e29]" />
                   <span>{cameraError ? 'Retry camera' : 'Take photo'}</span>

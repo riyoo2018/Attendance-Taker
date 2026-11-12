@@ -139,7 +139,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ record, university, 
               <div>
                 <span className="text-slate-500 block">Verification Protocol</span>
                 <span className="font-medium text-emerald-800">
-                  {record.verificationMethod === 'GPS_FACE'
+                  {record.verificationMethod !== 'MANUAL_OVERRIDE'
                     ? 'GPS geofence + selfie captured (no face recognition)'
                     : 'Authorized Manual Lecturer Override'}
                 </span>
