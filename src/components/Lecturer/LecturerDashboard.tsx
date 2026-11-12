@@ -648,8 +648,8 @@ export const LecturerDashboard: React.FC<LecturerDashboardProps> = ({
                 <p>
                   Geofence enforcement active: Students must be physically located within{' '}
                   <strong className="text-white">{activeSession.permittedRadiusMeters}m</strong> of{' '}
-                  <strong className="text-white">{activeSession.classroomName}</strong>. Biometric selfie verification
-                  required.
+                  <strong className="text-white">{activeSession.classroomName}</strong>. Students check in using
+                  their university ID, location, and a selfie photo. The demo does not match faces.
                 </p>
               </div>
             </div>

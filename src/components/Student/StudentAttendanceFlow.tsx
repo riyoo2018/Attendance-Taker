@@ -667,7 +667,7 @@ export const StudentAttendanceFlow: React.FC<StudentAttendanceFlowProps> = ({
             <div className="bg-amber-50/80 border border-amber-200/90 rounded-2xl p-3.5 text-xs text-amber-900 flex items-start gap-2.5">
               <Camera className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
               <p className="leading-relaxed">
-                Capture a live selfie for this attendance record. This demo captures an image but does not perform facial identity matching.
+                Your selfie is attached to the attendance record. It is not used for face recognition.
               </p>
             </div>
 
@@ -737,8 +737,8 @@ export const StudentAttendanceFlow: React.FC<StudentAttendanceFlowProps> = ({
                 {capturedPhoto
                   ? autoSubmitCountdown !== null
                     ? `Submitting automatically in ${autoSubmitCountdown}...`
-                    : 'Verifying photo...'
-                  : 'Hold the phone close to your face — the photo is taken automatically'}
+                    : 'Photo ready. Submit when you are satisfied.'
+                  : 'Center your face in the frame, then take a photo.'}
               </p>
             </div>
 
@@ -844,7 +844,7 @@ export const StudentAttendanceFlow: React.FC<StudentAttendanceFlowProps> = ({
             <div>
               <h2 className="text-base font-bold text-slate-900">Recording your attendance...</h2>
               <p className="text-xs text-slate-500 mt-1">
-                Authenticating student ID and encrypting GPS timestamp...
+                Checking your attendance details and recording your check-in...
               </p>
             </div>
           </div>
@@ -868,13 +868,13 @@ export const StudentAttendanceFlow: React.FC<StudentAttendanceFlowProps> = ({
                 <div className="w-20 h-20 rounded-full overflow-hidden border-3 border-emerald-600 shadow-md">
                   <img
                     src={confirmedRecord.selfieDataUrl}
-                    alt="Verified student"
+                    alt="Student selfie"
                     className="w-full h-full object-cover"
                   />
                 </div>
               ) : (
                 <div className="w-20 h-20 rounded-full bg-emerald-50 border-2 border-emerald-500 flex items-center justify-center font-bold text-emerald-800 text-sm">
-                  VERIFIED
+                  PRESENT
                 </div>
               )}
             </div>

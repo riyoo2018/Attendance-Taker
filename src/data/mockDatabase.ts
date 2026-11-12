@@ -341,6 +341,6 @@ export const initialAuditLogs: AuditLog[] = [
     userName: 'MENSAH, Abigail Nana',
     role: 'SYSTEM',
     action: 'ATTENDANCE_RECORDED',
-    details: 'Verified Student ID 21008451 via GPS (accuracy ±12m) & facial capture.',
+    details: 'Student ID 21008451 checked in via GPS (accuracy ±12m) with a selfie photo attached.',
   },
 ];

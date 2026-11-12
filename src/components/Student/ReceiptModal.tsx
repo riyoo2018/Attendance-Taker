@@ -64,7 +64,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ record, university, 
             <p className="text-xs font-semibold text-emerald-800 tracking-wide uppercase">
               {university.collegeName} ({university.collegeShort})
             </p>
-            <p className="text-[11px] text-slate-500 mt-0.5">Automated Biometric & Geolocation Attendance System</p>
+            <p className="text-[11px] text-slate-500 mt-0.5">GPS & Selfie Attendance Record</p>
           </div>
 
           {/* Reference & Status Banner */}
@@ -140,7 +140,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ record, university, 
                 <span className="text-slate-500 block">Verification Protocol</span>
                 <span className="font-medium text-emerald-800">
                   {record.verificationMethod === 'GPS_FACE'
-                    ? 'Biometric Facial Capture + Haversine Geofence'
+                    ? 'GPS geofence + selfie captured (no face recognition)'
                     : 'Authorized Manual Lecturer Override'}
                 </span>
               </div>
@@ -162,8 +162,8 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ record, university, 
                 </div>
               )}
               <div className="text-[11px] text-slate-500 max-w-xs">
-                <p className="font-semibold text-slate-700">Digital Identity Stamp</p>
-                <p>Cryptographically hashed and permanently archived on the university registrar attendance ledger.</p>
+                <p className="font-semibold text-slate-700">Selfie attached</p>
+                <p>This demo records a photo but does not use face recognition to verify identity.</p>
               </div>
             </div>
 

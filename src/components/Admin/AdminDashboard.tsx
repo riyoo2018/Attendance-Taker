@@ -307,7 +307,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <span className="text-2xl lg:text-3xl font-extrabold font-mono text-emerald-800">
                 {todayRecordsCount}
               </span>
-              <span className="text-[11px] text-emerald-700 font-semibold block mt-1">GPS & Biometric Checked</span>
+              <span className="text-[11px] text-emerald-700 font-semibold block mt-1">GPS check & selfie capture</span>
             </div>
 
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
